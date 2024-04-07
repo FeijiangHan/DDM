@@ -85,7 +85,7 @@ class DDM(nn.Module):
             x = F.layer_norm(x, (x.shape[-1], ))
 
         t = torch.randint(self.T, size=(x.shape[0], ), device=x.device)
-        x_t, time_embed, g, label_embed = self.sample_q(t, x, g)
+        x_t, time_embed, g = self.sample_q(t, x, g)
 
         loss = self.node_denoising(x, x_t, time_embed, g)
         loss_item = {"loss": loss.item()}
@@ -107,7 +107,7 @@ class DDM(nn.Module):
 
     def node_denoising(self, x, x_t, time_embed, g):
         out, _ = self.net(g, x_t=x_t, time_embed=time_embed)
-        loss = sce_loss(out, x, self.alpha_l)
+        loss = loss_fn(out, x, self.alpha_l)
 
         return loss
 
